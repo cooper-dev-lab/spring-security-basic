@@ -287,3 +287,17 @@ public final class DefaultSecurityFilterChain implements SecurityFilterChain {
   ```
 
 <br>
+
+## 5. Handling Security Exceptions
+
+![image](https://user-images.githubusercontent.com/48561660/195985175-3b75daba-9d3e-41a9-acb5-f7ff456c60bb.png)
+
+1. SecurityFilterChain 에 ExceptionTranslationFilter 은 다른 application logic 을 호출하기 위해 
+   FilterChain.doFilter(request, response) 을 실행한다.
+2. 사용자가 인증되지 않았거나 AuthenticationException 을 반환하는 경우,
+   1. SecurityContextHolder 가 지워진다.
+   2. HttpServletRequest 는 RequestCache 에 저장된다. 사용자가 성공적으로 인증되면 RequestCache 를 사용하여 원래 요청을 재생한다.
+   3. `AuthenticationEntryPoint` 를 사용하여 클라이언트에서 자격 증명을 요청한다. 예를 들어 로그인 페이지로 리디렉션하거나 WWW-Authenticate 헤더를 보낼 수 있다.
+3. 그렇지 않으면 `AccessDeniedException` 이면 액세스가 거부됩니다. `AccessDeniedHandler` 는 액세스 거부를 처리하기 위해 호출한다.
+
+- (application 이 AccessDeniedException 또는 AuthenticationException 을 던지지 않으면 ExceptionTranslationFilter 는 아무 작업도 수행하지 않는다!!)
